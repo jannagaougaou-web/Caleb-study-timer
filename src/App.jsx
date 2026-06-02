@@ -25,6 +25,81 @@ const PETALS = Array.from({ length: 12 }, (_, i) => ({
   size: `${6 + (i * 2) % 10}px`,
 }))
 
+// ── Background URL Modal ──────────────────────────────────────────────────────
+function BgModal({ current, onClose, onSave }) {
+  const [url, setUrl] = useState(current || '')
+
+  const handleSave = () => {
+    onSave(url.trim())
+    onClose()
+  }
+
+  const handleClear = () => {
+    onSave('')
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="w-full max-w-sm rounded-sm fade-in" style={{
+        background: '#0f0c1a',
+        border: '1px solid rgba(155,109,255,0.3)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+      }}>
+        <div className="px-5 pt-5 pb-3 border-b" style={{ borderColor: 'rgba(155,109,255,0.15)' }}>
+          <p className="text-xs tracking-widest uppercase mb-1" style={{ color: 'var(--purple-soft)', opacity: 0.7 }}>✦ Background</p>
+          <h2 className="font-display text-2xl font-light italic" style={{ color: 'var(--text)' }}>Set Image</h2>
+        </div>
+
+        <div className="px-5 py-4">
+          <p className="text-xs mb-3" style={{ color: 'var(--text-dim)' }}>
+            Paste any image URL from Imgur, Google Drive, or any image host.
+          </p>
+          <input
+            autoFocus
+            type="text"
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSave() }}
+            placeholder="https://i.imgur.com/..."
+            className="w-full px-3 py-2 text-sm rounded-sm outline-none"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid var(--border)',
+              color: 'var(--text)',
+              fontFamily: 'DM Sans, sans-serif',
+            }}
+          />
+          {/* Preview */}
+          {url.trim() && (
+            <div className="mt-3 rounded-sm overflow-hidden" style={{ height: '80px' }}>
+              <img
+                src={url.trim()}
+                alt="preview"
+                className="w-full h-full object-cover"
+                onError={e => e.target.style.display = 'none'}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 pb-5 flex gap-2 justify-between">
+          {current && (
+            <button onClick={handleClear} className="btn-end text-xs">Remove</button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <button onClick={onClose} className="btn-secondary">Cancel</button>
+            <button onClick={handleSave} className="btn-primary">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Course Manager Modal ──────────────────────────────────────────────────────
 function CourseManager({ courses, onClose, onSave }) {
   const [list, setList] = useState([...courses])
@@ -67,29 +142,28 @@ function CourseManager({ courses, onClose, onSave }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+    >
       <div className="w-full max-w-sm rounded-sm fade-in" style={{
         background: '#0f0c1a',
         border: '1px solid rgba(155,109,255,0.3)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
       }}>
-        {/* Header */}
         <div className="px-5 pt-5 pb-3 border-b" style={{ borderColor: 'rgba(155,109,255,0.15)' }}>
           <p className="text-xs tracking-widest uppercase mb-1" style={{ color: 'var(--purple-soft)', opacity: 0.7 }}>✦ Manage</p>
           <h2 className="font-display text-2xl font-light italic" style={{ color: 'var(--text)' }}>Your Courses</h2>
         </div>
 
-        {/* List */}
         <div className="px-5 py-3 max-h-64 overflow-y-auto">
           {list.length === 0 && (
             <p className="text-xs text-center py-4" style={{ color: 'var(--text-dim)' }}>No courses yet — add one below</p>
           )}
           {list.map((c, i) => (
             <div key={i} className="flex items-center gap-2 py-1.5 group">
-              {/* Reorder */}
               <div className="flex flex-col gap-0.5">
-                <button onClick={() => moveUp(i)} className="text-xs leading-none transition-opacity opacity-30 group-hover:opacity-70 hover:!opacity-100" style={{ color: 'var(--purple-soft)', background: 'none', border: 'none', cursor: 'pointer' }}>▲</button>
-                <button onClick={() => moveDown(i)} className="text-xs leading-none transition-opacity opacity-30 group-hover:opacity-70 hover:!opacity-100" style={{ color: 'var(--purple-soft)', background: 'none', border: 'none', cursor: 'pointer' }}>▼</button>
+                <button onClick={() => moveUp(i)} style={{ color: 'var(--purple-soft)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', opacity: 0.4 }}>▲</button>
+                <button onClick={() => moveDown(i)} style={{ color: 'var(--purple-soft)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', opacity: 0.4 }}>▼</button>
               </div>
 
               {editIdx === i ? (
@@ -117,7 +191,6 @@ function CourseManager({ courses, onClose, onSave }) {
           ))}
         </div>
 
-        {/* Add new */}
         <div className="px-5 py-3 border-t" style={{ borderColor: 'rgba(155,109,255,0.15)' }}>
           <div className="flex gap-2">
             <input
@@ -132,7 +205,6 @@ function CourseManager({ courses, onClose, onSave }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-5 pb-5 pt-3 flex gap-2 justify-end">
           <button onClick={onClose} className="btn-secondary">Cancel</button>
           <button onClick={() => onSave(list)} className="btn-primary">Save</button>
@@ -151,26 +223,28 @@ export default function App() {
     } catch { return DEFAULT_COURSES }
   })
 
+  const [bgUrl, setBgUrl] = useState(() => {
+    try { return localStorage.getItem('studytimer_bg') || '' } catch { return '' }
+  })
+
   const [course, setCourse] = useState('')
+  const [sessionName, setSessionName] = useState('')
   const [sessionDate, setSessionDate] = useState(todayISO())
   const [seconds, setSeconds] = useState(0)
   const [running, setRunning] = useState(false)
   const [started, setStarted] = useState(false)
   const [status, setStatus] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
-  const [bgImage, setBgImage] = useState(null)
+  const [showBgModal, setShowBgModal] = useState(false)
   const [showCourseManager, setShowCourseManager] = useState(false)
   const intervalRef = useRef(null)
-  const fileInputRef = useRef(null)
 
-  // Set default course when courses load/change
   useEffect(() => {
     if (courses.length > 0 && !courses.includes(course)) {
       setCourse(courses[0])
     }
   }, [courses])
 
-  // Timer
   useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
@@ -180,9 +254,14 @@ export default function App() {
     return () => clearInterval(intervalRef.current)
   }, [running])
 
+  const saveBg = (url) => {
+    setBgUrl(url)
+    try { localStorage.setItem('studytimer_bg', url) } catch {}
+  }
+
   const saveCourses = (newList) => {
     setCourses(newList)
-    localStorage.setItem('studytimer_courses', JSON.stringify(newList))
+    try { localStorage.setItem('studytimer_courses', JSON.stringify(newList)) } catch {}
     if (newList.length > 0 && !newList.includes(course)) setCourse(newList[0])
     setShowCourseManager(false)
   }
@@ -199,14 +278,13 @@ export default function App() {
     setRunning(false)
     if (seconds === 0) return
     setStatus('loading')
-
     const duration = Math.round(seconds / 60) || 1
 
     try {
       const res = await fetch('/api/log-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course, duration, date: sessionDate }),
+        body: JSON.stringify({ course, duration, date: sessionDate, sessionName }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -218,6 +296,7 @@ export default function App() {
         setStarted(false)
         setStatus(null)
         setSessionDate(todayISO())
+        setSessionName('')
       }, 3000)
     } catch (err) {
       setStatus('error')
@@ -231,26 +310,24 @@ export default function App() {
     setSeconds(0)
     setStatus(null)
     setSessionDate(todayISO())
+    setSessionName('')
   }
 
   return (
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
-      {showCourseManager && (
-        <CourseManager
-          courses={courses}
-          onClose={() => setShowCourseManager(false)}
-          onSave={saveCourses}
-        />
-      )}
+
+      {/* Modals */}
+      {showBgModal && <BgModal current={bgUrl} onClose={() => setShowBgModal(false)} onSave={saveBg} />}
+      {showCourseManager && <CourseManager courses={courses} onClose={() => setShowCourseManager(false)} onSave={saveCourses} />}
 
       {/* Background */}
       <div className="absolute inset-0 transition-all duration-700" style={{
-        backgroundImage: bgImage ? `url(${bgImage})` : 'radial-gradient(ellipse at 20% 50%, #1e0b38 0%, #0d0b14 60%)',
+        backgroundImage: bgUrl ? `url(${bgUrl})` : 'radial-gradient(ellipse at 20% 50%, #1e0b38 0%, #0d0b14 60%)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }} />
       <div className="absolute inset-0" style={{
-        background: bgImage
+        background: bgUrl
           ? 'linear-gradient(to bottom, rgba(10,7,20,0.55) 0%, rgba(10,7,20,0.75) 100%)'
           : 'linear-gradient(to bottom, rgba(13,11,20,0.3) 0%, rgba(13,11,20,0.7) 100%)'
       }} />
@@ -275,6 +352,7 @@ export default function App() {
 
       {/* Card */}
       <div className="relative z-10 w-full max-w-sm mx-4 fade-in">
+
         {/* Header */}
         <div className="text-center mb-6">
           <p className="text-xs tracking-[0.35em] uppercase mb-1" style={{ color: 'var(--purple-soft)', opacity: 0.7 }}>✦ Study Session ✦</p>
@@ -289,25 +367,43 @@ export default function App() {
           boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(155,109,255,0.1)',
         }}>
 
-          {/* Course selector */}
+          {/* Session Name */}
+          <div className="mb-4">
+            <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: 'var(--text-dim)' }}>Session Name</label>
+            <input
+              type="text"
+              value={sessionName}
+              onChange={e => setSessionName(e.target.value)}
+              disabled={started}
+              placeholder="e.g. Chapter 5 review..."
+              className="w-full rounded-sm px-3 py-2 text-sm outline-none transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+                fontFamily: 'DM Sans, sans-serif',
+                opacity: started ? 0.6 : 1,
+                cursor: started ? 'not-allowed' : 'text',
+              }}
+            />
+          </div>
+
+          {/* Course */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-dim)' }}>Course</label>
               <button
                 onClick={() => setShowCourseManager(true)}
-                className="text-xs tracking-wider transition-all"
-                style={{ color: 'var(--purple-soft)', opacity: 0.6, background: 'none', border: 'none', cursor: 'pointer' }}
+                style={{ color: 'var(--purple-soft)', opacity: 0.6, background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.1em' }}
                 onMouseEnter={e => e.target.style.opacity = 1}
                 onMouseLeave={e => e.target.style.opacity = 0.6}
-              >
-                ✦ customize
-              </button>
+              >✦ customize</button>
             </div>
             <select
               value={course}
               onChange={e => setCourse(e.target.value)}
               disabled={started}
-              className="w-full rounded-sm px-3 py-2 text-sm outline-none transition-all"
+              className="w-full rounded-sm px-3 py-2 text-sm outline-none"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid var(--border)',
@@ -321,7 +417,7 @@ export default function App() {
             </select>
           </div>
 
-          {/* Date picker */}
+          {/* Date */}
           <div className="mb-5">
             <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: 'var(--text-dim)' }}>Session Date</label>
             <input
@@ -329,7 +425,7 @@ export default function App() {
               value={sessionDate}
               onChange={e => setSessionDate(e.target.value)}
               disabled={started}
-              className="w-full rounded-sm px-3 py-2 text-sm outline-none transition-all"
+              className="w-full rounded-sm px-3 py-2 text-sm outline-none"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid var(--border)',
@@ -369,11 +465,13 @@ export default function App() {
 
           <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border), transparent)' }} />
 
-          {/* Status / Buttons */}
+          {/* Buttons / Status */}
           {status === 'success' ? (
             <div className="text-center py-2 fade-in">
               <p className="font-display italic text-lg mb-1" style={{ color: 'var(--purple-soft)' }}>✦ Session logged successfully ✦</p>
-              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>{Math.round(seconds / 60) || 1} min · {course} · {sessionDate}</p>
+              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                {sessionName && `${sessionName} · `}{Math.round(seconds / 60) || 1} min · {course}
+              </p>
             </div>
           ) : status === 'error' ? (
             <div className="text-center py-2 fade-in">
@@ -395,29 +493,19 @@ export default function App() {
           )}
         </div>
 
-        {/* Background upload */}
+        {/* Background button */}
         <div className="mt-4 text-center">
-          <input ref={fileInputRef} type="file" accept="image/*" onChange={e => {
-            const file = e.target.files[0]
-            if (file) setBgImage(URL.createObjectURL(file))
-          }} className="hidden" />
           <button
-            onClick={() => fileInputRef.current.click()}
+            onClick={() => setShowBgModal(true)}
             className="text-xs tracking-widest uppercase transition-all"
             style={{ color: 'var(--text-dim)', background: 'none', border: 'none', cursor: 'pointer' }}
             onMouseEnter={e => e.target.style.color = 'var(--purple-soft)'}
             onMouseLeave={e => e.target.style.color = 'var(--text-dim)'}
           >
-            ✦ {bgImage ? 'Change Background' : 'Upload Background'} ✦
+            ✦ {bgUrl ? 'Change Background' : 'Set Background'} ✦
           </button>
-          {bgImage && (
-            <button onClick={() => setBgImage(null)} className="ml-3 text-xs"
-              style={{ color: 'rgba(255,100,140,0.5)', background: 'none', border: 'none', cursor: 'pointer' }}
-              onMouseEnter={e => e.target.style.color = 'rgba(255,140,170,0.9)'}
-              onMouseLeave={e => e.target.style.color = 'rgba(255,100,140,0.5)'}
-            >remove</button>
-          )}
         </div>
+
       </div>
     </div>
   )
