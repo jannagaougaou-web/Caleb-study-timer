@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Allow embedding in Notion
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -7,13 +6,13 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { course, duration, date } = req.body;
+  const { course, duration, date, sessionName } = req.body;
 
   const NOTION_TOKEN = process.env.NOTION_TOKEN;
   const NOTION_DB_ID = process.env.NOTION_STUDY_DB_ID;
 
   if (!NOTION_TOKEN || !NOTION_DB_ID) {
-    return res.status(500).json({ error: 'Missing Notion credentials in environment variables' });
+    return res.status(500).json({ error: 'Missing Notion credentials' });
   }
 
   try {
@@ -27,7 +26,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         parent: { database_id: NOTION_DB_ID },
         properties: {
-          // Adjust these property names to match your exact Notion database column names
+          // Page title — the session name
+          'Name': {
+            title: [{ text: { content: sessionName || 'Study Session' } }]
+          },
           'Course': {
             select: { name: course }
           },
